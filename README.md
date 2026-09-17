@@ -8,9 +8,9 @@
 | 文件 | 是什么 | 在哪 |
 |---|---|---|
 | `<船名>.speaker.safetensors` | 说话人嵌入（约 49 KB） | 本仓库 `speaker/` |
-| `<目录名>.safetensors` | LoRA 适配器（约 105 MB） | [Releases](../../releases) 附件 |
+| `<目录名>.safetensors` | LoRA 适配器（约 101 MB） | 本仓库 `lora/`，**切成两片存**（见装法第 2 步）|
 
-大的那份（LoRA）走 Release 附件，不进 git 历史——GitHub 单文件上限 100 MB，塞不进仓库。
+大的那份（LoRA，101 MB）超过 GitHub 单文件上限 100 MB，所以**一切两半**存在 `lora/` 里，下载后合并还原即可。
 
 ## 装法
 
@@ -27,17 +27,26 @@ cd Irodori-TTS
 **2. 把音色放进去**
 
 ```bash
-# 从本仓库拿 speaker 嵌入
-cp -r <本仓库>/speaker/*.safetensors ./voice/speaker/     # 具体目录名以上游为准
+# speaker 嵌入（每船 49 KB）
+cp <本仓库>/speaker/*.safetensors ./voice/speaker/
 
-# 从 Releases 下载 LoRA，按目录名放好（目录名见下表）
-mkdir -p outputs/albion_lora_emo_spk/checkpoint_final
-mv albion_lora_emo_spk.safetensors outputs/albion_lora_emo_spk/checkpoint_final/adapter_model.safetensors
-# 其余四条同理
+# LoRA：仓库里每个适配器切成两片（每片 ~50 MB），合并后再放
+cd <本仓库>/lora
+for f in *.part1; do
+  base=${f%.part1}
+  cat "$base.part1" "$base.part2" > "../merged/$base"
+done
+# 把 merged/ 里合并出来的文件按下面的目录名放进 outputs/<目录>/checkpoint_final/adapter_model.safetensors
+```
+
+Windows 上一行就够（在 `lora` 目录里）：
+
+```bat
+for %f in (*.part1) do copy /b "%f" "%~nf.part2" "%~nf"
 ```
 
 `lora-meta/<目录名>/` 里是训练留下的配置（`adapter_config.json` / `config.json` / `irodori_lora_metadata.json`），
-一并放进同目录即可；`trainer_state.pt` 是训练续跑用的中间状态，**用不上，没随附件发**。
+一并放进同目录即可；`trainer_state.pt` 是训练续跑用的中间状态，**用不上，没随仓库发**。
 
 **3. 抄音色表**
 
