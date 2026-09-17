@@ -1,0 +1,6 @@
+{
+  "base_init": {
+    "mode": "checkpoint",
+    "checkpoint_path": "D:\\AI\\Irodori-TTS\\checkpoints\\model.safetensors"
+  }
+}
